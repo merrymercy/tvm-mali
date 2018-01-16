@@ -50,6 +50,9 @@ cat result-acl.txt
 ```
 results are recored in `result-acl.txt`
 
+**Note** Some testcases (e.g. resnet) are missing because Arm Compute Library currently (v17.12) does not 
+support skip connection in its graph runtime. Also some testcases are too slow so that be skipped.
+
 ## Result
 Paste the outputs on my board here.
 
