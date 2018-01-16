@@ -2,7 +2,7 @@
 
 ![result](results.png)
 
-<center>Tested on Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4</center>
+<p align='center'>Tested on <code>Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4 </code></p>
 
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
