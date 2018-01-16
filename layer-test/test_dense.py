@@ -8,8 +8,6 @@ from tvm.contrib import rpc, util
 from topi.util import get_const_tuple
 from tvm.contrib.pickle_memoize import memoize
 
-import target
-
 dtype = 'float16'
 
 USE_MANUAL_CODE = False
