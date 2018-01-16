@@ -1,5 +1,10 @@
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
+## Inference Speed on ImageNet
+Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
+
+![result](results.png)
+
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
 so you should build TVM runtime and start a RPC server on your device.
@@ -44,6 +49,9 @@ copy the binary file acl\_test to your device and run
 cat result-acl.txt
 ```
 results are recored in `result-acl.txt`
+
+**Note** Some testcases (e.g. resnet) are missing because Arm Compute Library currently (v17.12) does not 
+support skip connection in its graph runtime. Also some testcases are too slow so that be skipped.
 
 ## Result
 Paste the outputs on my board here.
