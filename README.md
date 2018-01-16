@@ -1,5 +1,7 @@
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
+![result](results.png)
+
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
 so you should build TVM runtime and start a RPC server on your device.
