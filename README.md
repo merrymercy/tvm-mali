@@ -2,6 +2,7 @@
 
 ## Inference Speed on ImageNet
 Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
+
 ![result](results.png)
 
 ## Run Test for TVM/NNVM
