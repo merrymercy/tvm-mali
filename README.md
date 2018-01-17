@@ -1,6 +1,6 @@
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
-This repo is the supporting material of [Optimizing Mobile Deep Learning on ARM GPU with TVM](http://tvmlang.org/2018/01/16/opt-mali-gpu.html)
+This repo is the supporting material for [Optimizing Mobile Deep Learning on ARM GPU with TVM](http://tvmlang.org/2018/01/16/opt-mali-gpu.html)
 
 ## Inference Speed on ImageNet
 Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
