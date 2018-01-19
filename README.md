@@ -6,6 +6,13 @@ This repo is the supporting material for [Optimizing Mobile Deep Learning on ARM
 Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
 
 ![result](results.png)
+ 
+## Set Test Environment
+```
+sudo /etc/init.d/lightdm stop
+sudo -i
+echo performance > /sys/class/misc/mali0/device/devfreq/ff9a0000.gpu/governor
+```
 
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
