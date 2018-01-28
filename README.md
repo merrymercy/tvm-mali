@@ -15,7 +15,7 @@ echo performance > /sys/class/misc/mali0/device/devfreq/ff9a0000.gpu/governor
 ```
 
 ## Run Test for TVM/NNVM
-In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
+In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_mali_gpu.html) to do test,
 so you should build TVM runtime and start a RPC server on your device.
 ```
 python -m tvm.exec.rpc_server --host 0.0.0.0 --port=9090
