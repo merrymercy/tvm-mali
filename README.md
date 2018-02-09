@@ -13,6 +13,7 @@ sudo /etc/init.d/lightdm stop
 sudo -i
 echo performance > /sys/class/misc/mali0/device/devfreq/ff9a0000.gpu/governor
 ```
+This can make the environment more stable.
 
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_mali_gpu.html) to do test,
