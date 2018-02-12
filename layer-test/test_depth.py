@@ -7,7 +7,7 @@ from tvm.contrib import rpc, util
 from topi.util import get_const_tuple
 from tvm.contrib.pickle_memoize import memoize
 
-dtype = 'float16'
+dtype = 'float32'
 
 def convert_to_remote(func, remote):
     temp = util.tempdir() 
@@ -189,5 +189,5 @@ if __name__ == "__main__":
     remote = rpc.connect(host, port)
     target_host = "llvm -target=aarch64-linux-gnu -mattr=+neon"
 
-    verify_workloads(remote.cl(), 5000, target_host, remote)
+    verify_workloads(remote.cl(), 10000, target_host, remote)
 

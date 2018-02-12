@@ -95,7 +95,7 @@ def tune_conv2d_nchw(batch, in_size, in_channel, num_filter, kernel, padding, st
     best_cost = 1e9
     best_config = None
     for config in reversed(tune_pack):
-        with tvm.target.rasp():
+        with tvm.target.mali():
             tvm.target.current_target().tune_config = config
             B = topi.nn.conv2d(A, W, stride, padding)
             s = topi.generic.schedule_conv2d_nchw([B])
@@ -122,13 +122,22 @@ def tune_conv2d_nchw(batch, in_size, in_channel, num_filter, kernel, padding, st
 
 
 def verify_conv2d_nchw(batch, in_size, in_channel, num_filter, kernel, padding, stride, ctx,
-                       n_times=1, target_host=None, remote=None):
+                       n_times=1, target=None, target_host=None, remote=None):
     in_height = in_width = in_size
 
     A = tvm.placeholder((batch, in_channel, in_height, in_width), dtype=dtype, name='data')
     W = tvm.placeholder((num_filter, in_channel, kernel, kernel), dtype=dtype, name='weight')
 
-    with tvm.target.mali():
+#    config = {
+#        'VH': 4,
+#        'num_thread': 8,
+#        'VC': 4,
+#        'last': 2,
+#        'VW': 4,
+#    }
+
+    with target:
+        #tvm.target.current_target().tune_config = config
         B = topi.nn.conv2d(A, W, stride, padding)
         #B = topi.nn.relu(B)
         s = topi.generic.schedule_conv2d_nchw([B])
@@ -173,9 +182,9 @@ workloads = [
 #    (1, 224, 3,  64,  3, 1, 1),
 #    (1, 224, 64, 64,  3, 1, 1),
 #    (1, 112, 64, 128, 3, 1, 1),
-#    (1, 112,128, 128, 3, 1, 1),
+    (1, 112,128, 128, 3, 1, 1),
 #    (1, 56, 128, 256, 3, 1, 1),
-    (1, 56, 256, 256, 3, 1, 1),
+#    (1, 56, 256, 256, 3, 1, 1),
 #    (1, 28, 256, 512, 3, 1, 1),
 #    (1, 28, 512, 512, 3, 1, 1),
 #    (1, 14, 512, 512, 3, 1, 1),
@@ -183,7 +192,7 @@ workloads = [
 #
 #   # resnet-18
 #    (1, 224, 3,   64,  7, 3, 2),
-#    (1, 56,  64,  64,  3, 1, 1),
+     #(1, 56,  64,  64,  3, 1, 1),
 #    (1, 56,  64,  64,  1, 0, 1),
 #    (1, 56,  64,  128, 3, 1, 2),
 #    (1, 56,  64,  128, 1, 0, 2),
@@ -208,25 +217,30 @@ workloads = [
 #    (1, 7,   1024, 1024, 1, 0, 1),
 ]
 
-def verify_workloads(ctx, n_times=1, target_host=None, remote=None):
+def verify_workloads(ctx, n_times=1, target=None, target_host=None, remote=None):
     for item in workloads:
-        cost, gflops = verify_conv2d_nchw(*item, ctx=ctx, target_host=target_host, remote=remote)
+        cost, gflops = verify_conv2d_nchw(*item, ctx=ctx, target=target,
+                target_host=target_host, remote=remote)
         print("%-30s %.6f %.6f" % (item, cost, gflops))
 
-def tune_workloads(ctx, n_times=1, target_host=None, remote=None):
-    ret = []
-    for item in workloads:
-        cost, gflops, config = tune_conv2d_nchw(*item, ctx=ctx, target_host=target_host, remote=remote)
-        print(item, cost, gflops, config)
-        ret.append([item, config])
-    for item in ret:
-        print(item, config)
+#def tune_workloads(ctx, n_times=1, target=None, target_host=None, remote=None):
+#    ret = []
+#    for item in workloads:
+#        cost, gflops, config = tune_conv2d_nchw(*item, ctx=ctx, target_host=target_host, remote=remote)
+#        print(item, cost, gflops, config)
+#        ret.append([item, config])
+#    for item in ret:
+#        print(item, config)
 
 if __name__ == "__main__":
     host = os.environ["TVM_OPENCL_DEVICE_HOST"]
     port = 9090
-    remote = rpc.connect(host, port)
-    target_host = "llvm -target=aarch64-linux-gnu -mattr=+neon"
+    #remote = rpc.connect(host, port)
+    #target_host = "llvm -target=aarch64-linux-gnu -mattr=+neon"
+    target_host=None
 
-    verify_workloads(remote.cl(), 1000, target_host, remote)
+    #verify_workloads(remote.cl(), 1000, tvm.target.mali(), target_host, remote)
+    verify_workloads(tvm.cl(), 1000,
+                     tvm.target.create("opencl -device=mercytest"),
+                     target_host, None)
 
