@@ -1,12 +1,22 @@
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
+This repo is the supporting material for [Optimizing Mobile Deep Learning on ARM GPU with TVM](http://tvmlang.org/2018/01/16/opt-mali-gpu.html)
+
 ## Inference Speed on ImageNet
 Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
 
 ![result](results.png)
+ 
+## Set Test Environment
+```
+sudo /etc/init.d/lightdm stop
+sudo -i
+echo performance > /sys/class/misc/mali0/device/devfreq/ff9a0000.gpu/governor
+```
+This can make the environment more stable.
 
 ## Run Test for TVM/NNVM
-In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_rasp.html) to do test,
+In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_mali_gpu.html) to do test,
 so you should build TVM runtime and start a RPC server on your device.
 ```
 python -m tvm.exec.rpc_server --host 0.0.0.0 --port=9090
