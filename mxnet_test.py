@@ -53,7 +53,7 @@ def test_module(model, dtype):
     cost = measure(num_test)
     # print("cost per image: %.4fs" % cost)
 
-    print("backend: MXNet+OpenBLAS\tmodel: %s\tdtype: %s\tcost:%.4f" % (model, dtype, prof_res.mean))
+    print("backend: MXNet+OpenBLAS\tmodel: %s\tdtype: %s\tcost:%.4f" % (model, dtype, cost))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -61,9 +61,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.model == 'all':
-        for model in ['vgg16', 'resnet18', 'mobilenet']:
+        for model in ['resnet18', 'mobilenet', 'vgg16']:
             test_module(model, 'float32')
-            time.sleep(30)
+            time.sleep(20)
     else:
         test_module(args.model, 'float32')
 
