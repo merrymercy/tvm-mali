@@ -36,8 +36,8 @@ def test_module(model, dtype):
         return cost / n_time
 
     # benchmark
-    print("============================================================")
-    print("model: %s, dtype: %s" % (model, dtype))
+    # print("============================================================")
+    # print("model: %s, dtype: %s" % (model, dtype))
 
     num_warmup = 15
     num_test   = 80
@@ -46,12 +46,14 @@ def test_module(model, dtype):
         num_test   *= 4
 
     # warm up
-    print("warm up...")
+    # print("warm up...")
     measure(num_warmup)
 
-    print("test..")
+    # print("test..")
     cost = measure(num_test)
-    print("cost per image: %.4fs" % cost)
+    # print("cost per image: %.4fs" % cost)
+
+    print("backend: MXNet+OpenBLAS\tmodel: %s\tdtype: %s\tcost:%.4f" % (model, dtype, prof_res.mean))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

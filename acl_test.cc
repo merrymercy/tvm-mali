@@ -219,6 +219,7 @@ int main(int argc, const char **argv)
 
                         // skip some test for neon
                         if (backend[i] == "neon" ) {
+                            continue;
                             if (conv_method[k] == "direct") // this config is too slow, skip it
                                 continue;
                             if (model[j] == "mobilenet")    // too slow, skip it
@@ -234,7 +235,14 @@ int main(int argc, const char **argv)
                         double cost = run_case(backend[i], model[j], conv_method[k], dtype[l]);
 
                         std::stringstream ss;
-                        ss << "backend: " << backend[i] << "\tmodel: " << model[j]
+
+                        std::string back_name;
+                        if (backend[i] == "cl")
+                            back_name = "mali";
+                        else
+                            back_name = "neon";
+
+                        ss << "backend: ARMComputeLib-" << back_name << "\tmodel: " << model[j]
                            << "\tconv_method: " << conv_method[k] << "\tdtype: " << dtype[l]
                            << "\tcost: "  << cost;
                         std::cout << ss.str() << std::endl;

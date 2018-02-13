@@ -38,12 +38,18 @@ def run_case(model, dtype):
     tmp = util.tempdir()
     lib_fname = tmp.relpath('net.tar')
     lib.export_library(lib_fname)
-    remote = rpc.connect(args.host, args.port)
-    remote.upload(lib_fname)
 
-    ctx = remote.cl(0)
-    rlib = remote.load_module('net.tar')
-    rparams = {k: tvm.nd.array(v, ctx) for k, v in params.items()}
+    if args.host is not None:
+        remote = rpc.connect(args.host, args.port)
+        remote.upload(lib_fname)
+
+        ctx = remote.cl(0)
+        rlib = remote.load_module('net.tar')
+        rparams = {k: tvm.nd.array(v, ctx) for k, v in params.items()}
+    else:
+        ctx = tvm.cl(0)
+        rlib = lib
+        rparams = params
 
     # create graph runtime
     module = runtime.create(graph, rlib, ctx)
@@ -51,8 +57,8 @@ def run_case(model, dtype):
     module.set_input(**rparams)
 
     # benchmark
-    print("============================================================")
-    print("model: %s, dtype: %s" % (model, dtype))
+    # print("============================================================")
+    # print("model: %s, dtype: %s" % (model, dtype))
 
     # the num of runs for warm up and test
     num_warmup = 10
@@ -62,25 +68,26 @@ def run_case(model, dtype):
         num_test   *= 5
 
     # perform some warm up runs
-    print("warm up..")
+    # print("warm up..")
     warm_up_timer = module.module.time_evaluator("run", ctx, num_warmup)
     warm_up_timer()
 
     # test
-    print("test..")
+    # print("test..")
     ftimer = module.module.time_evaluator("run", ctx, num_test)
     prof_res = ftimer()
-    print("cost per image: %.4fs" % prof_res.mean)
+    # print("cost per image: %.4fs" % prof_res.mean)
+
+    print("backend: TVM-mali\tmodel: %s\tdtype: %s\tcost:%.4f" % (model, dtype, prof_res.mean))
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model', type=str, required=True, choices=['vgg16', 'resnet18', 'mobilenet', 'all'],
                         help="The model type.")
     parser.add_argument('--dtype', type=str, default='float32', choices=['float16', 'float32'])
-    parser.add_argument('--host', type=str, required=True, help="The host address of your arm device.")
-    parser.add_argument('--port', type=int, required=True, help="The port number of your arm device")
-    parser.add_argument('--target-host', type=str, required=True, help="The compilation target of host device.")
-    parser.add_argument('--local', action='store_true')
+    parser.add_argument('--host', type=str, help="The host address of your arm device.", default=None)
+    parser.add_argument('--port', type=int, help="The port number of your arm device", default=None)
+    parser.add_argument('--target-host', type=str, help="The compilation target of host device.", default=None)
     args = parser.parse_args()
 
     # set parameter

@@ -18,8 +18,8 @@ cd ..
 
 # build arm compute library
 cd ComputeLibrary
-scons Werror=1 neon=1 opencl=1 examples=1 benchmark_tests=1 os=linux arch=arm64-v8a embed_kernels=1 build=native -j4
-cp ../acl_test.cc ComputeLibrary
+scons Werror=1 neon=1 opencl=1 examples=1 os=linux arch=arm64-v8a embed_kernels=1 build=native -j4
+cp ../acl_test.cc .
 
 g++ acl_test.cc build/utils/*.o -O2 -std=c++11 -I. -Iinclude -Lbuild -larm_compute -larm_compute_graph -larm_compute_core -lOpenCL -o acl_test
 cp acl_test ..
@@ -29,6 +29,4 @@ cd ..
 cd incubator-mxnet
 make -j2 USE_OPENCV=0 USE_BLAS=openblas
 cd ..
-
-export PYTHONPATH=$(pwd)/nnvm/python:$(pwd)/nnvm/tvm/python:$(pwd)/nnvm/tvm/topi/python:$(pwd)/incubator-mxnet/python
 
