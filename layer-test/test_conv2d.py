@@ -128,18 +128,8 @@ def verify_conv2d_nchw(batch, in_size, in_channel, num_filter, kernel, padding, 
     A = tvm.placeholder((batch, in_channel, in_height, in_width), dtype=dtype, name='data')
     W = tvm.placeholder((num_filter, in_channel, kernel, kernel), dtype=dtype, name='weight')
 
-#    config = {
-#        'VH': 4,
-#        'num_thread': 8,
-#        'VC': 4,
-#        'last': 2,
-#        'VW': 4,
-#    }
-
     with target:
-        #tvm.target.current_target().tune_config = config
         B = topi.nn.conv2d(A, W, stride, padding)
-        #B = topi.nn.relu(B)
         s = topi.generic.schedule_conv2d_nchw([B])
         func = tvm.build(s, [A, W, B], target_host=target_host)
         #print(func.imported_modules[0].get_source())
@@ -235,12 +225,8 @@ def verify_workloads(ctx, n_times=1, target=None, target_host=None, remote=None)
 if __name__ == "__main__":
     host = os.environ["TVM_OPENCL_DEVICE_HOST"]
     port = 9090
-    #remote = rpc.connect(host, port)
-    #target_host = "llvm -target=aarch64-linux-gnu -mattr=+neon"
-    target_host=None
+    remote = rpc.connect(host, port)
+    target_host = "llvm -target=aarch64-linux-gnu -mattr=+neon"
 
-    #verify_workloads(remote.cl(), 1000, tvm.target.mali(), target_host, remote)
-    verify_workloads(tvm.cl(), 1000,
-                     tvm.target.create("opencl -device=mercytest"),
-                     target_host, None)
+    verify_workloads(remote.cl(), 10, tvm.target.mali(), target_host, remote)
 
