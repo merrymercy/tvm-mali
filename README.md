@@ -15,6 +15,10 @@ echo performance > /sys/class/misc/mali0/device/devfreq/ff9a0000.gpu/governor
 ```
 This can make the environment more stable.
 
+**Note**: You need more than 2.5GB of memory to run the following test.
+Otherwise, you must skip the test of vgg16 by replacing `--model all` with `--model resnet18` or `--model mobilenet`
+in the commond.
+
 ## Run Test for TVM/NNVM
 In TVM, we use [RPC](http://nnvm.tvmlang.org/tutorials/deploy_model_on_mali_gpu.html) to do test,
 so you should build TVM runtime and start a RPC server on your device.
