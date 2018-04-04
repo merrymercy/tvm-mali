@@ -14,6 +14,7 @@ using namespace arm_compute;
 struct Workload {
     std::string in_dtype;
     std::string out_dtype;
+    size_t batch;
     size_t height;
     size_t width;
     size_t in_filter;
@@ -38,17 +39,17 @@ std::pair<double, double> MeasureConv(const Workload &w, int times=30) {
     CLScheduler::get().default_init();
 
     // allocate tensors
-    input.allocator()->init(TensorInfo(TensorShape(w.width, w.height, w.in_filter), format));
+    input.allocator()->init(TensorInfo(TensorShape(w.width, w.height, w.in_filter, w.batch), format));
     weight.allocator()->init(TensorInfo(TensorShape(w.wkernel, w.hkernel, w.in_filter, w.out_filter), format));
     size_t w_out = (w.width - w.wkernel + w.wpad * 2) / w.wstride + 1;
     size_t h_out = (w.height - w.hkernel + w.hpad * 2) / w.hstride + 1;
-    output.allocator()->init(TensorInfo(TensorShape(w_out, h_out, w.out_filter), format));
+    output.allocator()->init(TensorInfo(TensorShape(w_out, h_out, w.out_filter, w.batch), format));
     input.allocator()->allocate();
     weight.allocator()->allocate();
     output.allocator()->allocate();
     CLScheduler::get().sync();
 
-    // configure gemm function
+    // configure conv2d function
     CLConvolutionLayer conv2d;
     conv2d.configure(&input, &weight, nullptr, &output, conv_info);
 
@@ -66,7 +67,7 @@ std::pair<double, double> MeasureConv(const Workload &w, int times=30) {
     // calcuate gflops
     std::chrono::duration<double> fp_ms = end - begin;
     double cost = fp_ms.count() / times;
-    return std::make_pair(cost, 2.0 * w_out * h_out * w.out_filter *
+    return std::make_pair(cost, 2.0 * w.batch * w_out * h_out * w.out_filter *
                           w.hkernel * w.wkernel * w.in_filter / 1e9 / cost);
 }
 
@@ -75,41 +76,53 @@ int main(int argc, const char **argv)
 {
     Workload to_test[] = {
         // vgg16
-        Workload{"float32", "float32", 224, 224,  3, 64, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 224, 224, 64, 64, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 112, 112, 64, 128,3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 112, 112,128, 128,3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 56, 56, 128, 256, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 56, 56, 256, 256, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 28, 28, 256, 512, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 28, 28, 512, 512, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 14, 14, 512, 512, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 224, 224,  3, 64, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 224, 224, 64, 64, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 112, 112, 64, 128,3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 112, 112,128, 128,3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 56, 56, 128, 256, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 56, 56, 256, 256, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 28, 28, 256, 512, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 28, 28, 512, 512, 3, 3, 1, 1, 1, 1},
+//        Workload{"float32", "float32", 1, 14, 14, 512, 512, 3, 3, 1, 1, 1, 1},
 
         // resnet
-        Workload{"float32", "float32", 224, 224, 3, 64, 7, 7, 3, 3, 2, 2},
-        Workload{"float32", "float32", 56, 56, 64, 64,  3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 56, 56, 64, 64,  1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32", 56, 56, 64, 128, 3, 3, 1, 1, 2, 2},
-        Workload{"float32", "float32", 56, 56, 64, 128, 1, 1, 0, 0, 2, 2},
-        Workload{"float32", "float32", 28, 28, 128, 128, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 28, 28, 128, 256, 3, 3, 1, 1, 2, 2},
-        Workload{"float32", "float32", 28, 28, 128, 256, 1, 1, 0, 0, 2, 2},
-        Workload{"float32", "float32", 14, 14, 256, 256, 3, 3, 1, 1, 1, 1},
-        Workload{"float32", "float32", 14, 14, 256, 512, 3, 3, 1, 1, 2, 2},
-        Workload{"float32", "float32", 14, 14, 256, 512, 1, 1, 0, 0, 2, 2},
-        Workload{"float32", "float32", 7, 7, 512, 512, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32",  1, 224, 224, 3, 64,  7, 7, 3, 3, 2, 2},
+        Workload{"float32", "float32", 32, 224, 224, 3, 64,  7, 7, 3, 3, 2, 2},
+        Workload{"float32", "float32",  1, 56, 56, 64,  64,  3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32", 32, 56, 56, 64,  64,  3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32",  1, 56, 56, 64,  64,  1, 1, 0, 0, 1, 1},
+        Workload{"float32", "float32", 32, 56, 56, 64,  64,  1, 1, 0, 0, 1, 1},
+        Workload{"float32", "float32",  1, 56, 56, 64,  128, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32", 32, 56, 56, 64,  128, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32",  1, 56, 56, 64,  128, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32", 32, 56, 56, 64,  128, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32",  1, 28, 28, 128, 128, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32", 32, 28, 28, 128, 128, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32",  1, 28, 28, 128, 256, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32", 32, 28, 28, 128, 256, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32",  1, 28, 28, 128, 256, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32", 32, 28, 28, 128, 256, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32",  1, 14, 14, 256, 256, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32", 32, 14, 14, 256, 256, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32",  1, 14, 14, 256, 512, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32", 32, 14, 14, 256, 512, 3, 3, 1, 1, 2, 2},
+        Workload{"float32", "float32",  1, 14, 14, 256, 512, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32", 32, 14, 14, 256, 512, 1, 1, 0, 0, 2, 2},
+        Workload{"float32", "float32",  1, 7,  7,  512, 512, 3, 3, 1, 1, 1, 1},
+        Workload{"float32", "float32", 32, 7,  7,  512, 512, 3, 3, 1, 1, 1, 1},
 
-        // mobilenet
-        Workload{"float32", "float32", 224, 224,   3,  32, 3, 3, 1, 1, 2, 2},
-        Workload{"float32", "float32", 112, 112,  32,  64, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  56,  56,  64, 128, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  56,  56, 128, 128, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  28,  28, 128, 256, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  28,  28, 256, 256, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  14,  14, 256, 512, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",  14,  14, 512, 512, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",   7,  7, 512, 1024, 1, 1, 0, 0, 1, 1},
-        Workload{"float32", "float32",   7,  7, 1024,1024, 1, 1, 0, 0, 1, 1},
+//        // mobilenet
+//        Workload{"float32", "float32", 1, 224, 224,   3,  32, 3, 3, 1, 1, 2, 2},
+//        Workload{"float32", "float32", 1, 112, 112,  32,  64, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  56,  56,  64, 128, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  56,  56, 128, 128, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  28,  28, 128, 256, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  28,  28, 256, 256, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  14,  14, 256, 512, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,  14,  14, 512, 512, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,   7,  7, 512, 1024, 1, 1, 0, 0, 1, 1},
+//        Workload{"float32", "float32", 1,   7,  7, 1024,1024, 1, 1, 0, 0, 1, 1},
     };
 
     for (size_t i = 0; i < sizeof(to_test) / sizeof(to_test[0]); i++) {
