@@ -3,9 +3,14 @@
 This repo is the supporting material for [Optimizing Mobile Deep Learning on ARM GPU with TVM](http://tvmlang.org/2018/01/16/opt-mali-gpu.html)
 
 ## Inference Speed on ImageNet
-Tested on `Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4`
+Tested on 
+```
+Firefly-RK3399 4G, CPU: dual-core Cortex-A72 + quad-core Cortex-A53, GPU: Mali-T860MP4
+Arm Compute Library: v17.12,  MXNet: v1.0.1,  Openblas: v0.2.18
+```
 
 ![result](results.png)
+
  
 ## Set Test Environment
 ```
