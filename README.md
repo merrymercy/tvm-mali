@@ -1,3 +1,7 @@
+**Note: The data and script here are all stale. Please goto https://github.com/dmlc/tvm/wiki/Benchmark#mobile-gpu For the latest results.**
+
+
+
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
 This repo is the supporting material for [Optimizing Mobile Deep Learning on ARM GPU with TVM](http://tvmlang.org/2018/01/16/opt-mali-gpu.html)
