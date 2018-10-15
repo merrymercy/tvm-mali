@@ -1,6 +1,12 @@
-**Note: The data and script here are all stale. Please goto https://github.com/dmlc/tvm/wiki/Benchmark#mobile-gpu For the latest results.**
+# Note: The data and scripts here are all stale. Please go to https://github.com/dmlc/tvm/wiki/Benchmark#mobile-gpu For the latest results.
 
-
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
+<p><br></p>
 
 # Benchmarking Deep Neural Networks on ARM CPU/GPU
 
